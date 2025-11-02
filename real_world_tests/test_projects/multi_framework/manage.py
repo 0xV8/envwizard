@@ -1,1 +1,0 @@
-# Django manage.py
