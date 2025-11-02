@@ -1,8 +1,9 @@
 """Base project detector."""
 
+import ast
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional, Set, Tuple
 import yaml
 
 
@@ -22,6 +23,20 @@ class ProjectDetector:
         "celery": ["celery", "tasks.py", "celeryconfig.py"],
         "poetry": ["pyproject.toml", "poetry.lock"],
         "pipenv": ["Pipfile", "Pipfile.lock"],
+    }
+
+    # Framework-specific import patterns for AST detection
+    FRAMEWORK_IMPORTS = {
+        "django": ["django"],
+        "fastapi": ["fastapi"],
+        "flask": ["flask"],
+        "streamlit": ["streamlit"],
+        "pandas": ["pandas"],
+        "numpy": ["numpy"],
+        "pytest": ["pytest"],
+        "requests": ["requests"],
+        "sqlalchemy": ["sqlalchemy"],
+        "celery": ["celery"],
     }
 
     def __init__(self, project_path: Optional[Path] = None) -> None:
@@ -159,11 +174,29 @@ class ProjectDetector:
         return frameworks
 
     def _detect_from_structure(self) -> Set[str]:
-        """Detect frameworks from project file structure."""
+        """Detect frameworks from project file structure and Python imports.
+
+        This method now prioritizes AST-based import detection over filename patterns
+        to avoid false positives.
+        """
         frameworks = set()
 
+        # First, try AST-based detection on Python files
+        ast_frameworks = self._detect_from_imports()
+        if ast_frameworks:
+            frameworks.update(ast_frameworks)
+            # If we found frameworks via imports, return early to avoid false positives
+            # from filename-based detection
+            return frameworks
+
+        # Only fall back to filename-based detection if no imports were found
         for framework, indicators in self.FRAMEWORK_INDICATORS.items():
             for indicator in indicators:
+                # Skip filename patterns that can cause false positives
+                # Only check for specific framework files like manage.py
+                if indicator in ["app.py", "main.py", "wsgi.py"]:
+                    continue
+
                 # Check for files
                 if (self.project_path / indicator).exists():
                     frameworks.add(framework)
@@ -182,6 +215,98 @@ class ProjectDetector:
                             break
 
         return frameworks
+
+    def _detect_from_imports(self) -> Set[str]:
+        """Detect frameworks by parsing Python files and analyzing imports.
+
+        This is the primary detection method that uses AST parsing to identify
+        actual framework usage, avoiding false positives from filename patterns.
+        """
+        frameworks = set()
+
+        # Find all Python files in the project (recursively, up to 3 levels deep)
+        python_files = list(self.project_path.glob("*.py"))
+        python_files.extend(self.project_path.glob("*/*.py"))
+        python_files.extend(self.project_path.glob("*/*/*.py"))
+        python_files.extend(self.project_path.glob("*/*/*/*.py"))
+
+        # Parse each Python file and extract imports
+        for py_file in python_files:
+            file_frameworks = self._parse_python_file_imports(py_file)
+            frameworks.update(file_frameworks)
+
+        return frameworks
+
+    def _parse_python_file_imports(self, file_path: Path) -> Set[str]:
+        """Parse a Python file using AST to extract framework imports.
+
+        Args:
+            file_path: Path to the Python file to parse
+
+        Returns:
+            Set of detected framework names based on imports
+        """
+        frameworks = set()
+
+        try:
+            # Read the file content
+            content = file_path.read_text(encoding="utf-8")
+
+            # Skip empty files
+            if not content.strip():
+                return frameworks
+
+            # Parse the file into an AST
+            tree = ast.parse(content, filename=str(file_path))
+
+            # Extract all imports
+            imports = self._extract_imports_from_ast(tree)
+
+            # Match imports against framework patterns
+            for framework, patterns in self.FRAMEWORK_IMPORTS.items():
+                for pattern in patterns:
+                    if any(imp.startswith(pattern) or imp == pattern for imp in imports):
+                        frameworks.add(framework)
+
+        except SyntaxError:
+            # Silently ignore syntax errors - file might be incomplete or non-Python
+            pass
+        except UnicodeDecodeError:
+            # Silently ignore files that can't be decoded as UTF-8
+            pass
+        except Exception:
+            # Catch any other exceptions to prevent detection failures
+            pass
+
+        return frameworks
+
+    def _extract_imports_from_ast(self, tree: ast.AST) -> Set[str]:
+        """Extract all import module names from an AST.
+
+        Args:
+            tree: The AST to extract imports from
+
+        Returns:
+            Set of imported module names
+        """
+        imports = set()
+
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                # Handle: import module
+                for alias in node.names:
+                    # Get the top-level module name
+                    module_name = alias.name.split('.')[0]
+                    imports.add(module_name)
+
+            elif isinstance(node, ast.ImportFrom):
+                # Handle: from module import ...
+                if node.module:
+                    # Get the top-level module name
+                    module_name = node.module.split('.')[0]
+                    imports.add(module_name)
+
+        return imports
 
     def _detect_python_version(self) -> Optional[str]:
         """Detect required Python version from project files."""

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "envwizard"
-version = "0.1.0"
+version = "0.2.0"
 description = "Smart environment setup tool - One command to create virtual envs, install deps, and configure .env intelligently"
 readme = "README.md"
 requires-python = ">=3.9"

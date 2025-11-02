@@ -5,8 +5,8 @@
 [![PyPI version](https://badge.fury.io/py/envwizard.svg)](https://pypi.org/project/envwizard/)
 [![Python Support](https://img.shields.io/pypi/pyversions/envwizard.svg)](https://pypi.org/project/envwizard/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/tests-100%20passing-brightgreen.svg)](https://github.com/0xV8/envwizard)
-[![Coverage](https://img.shields.io/badge/coverage-76%25-green.svg)](https://github.com/0xV8/envwizard)
+[![Tests](https://img.shields.io/badge/tests-118%20passing-brightgreen.svg)](https://github.com/0xV8/envwizard)
+[![Coverage](https://img.shields.io/badge/coverage-73%25-green.svg)](https://github.com/0xV8/envwizard)
 [![Security](https://img.shields.io/badge/security-A+-brightgreen.svg)](https://github.com/0xV8/envwizard)
 
 ## ✨ Features
@@ -112,6 +112,7 @@ Complete project setup - creates venv, installs deps, generates .env
 - `--path, -p` - Project directory (default: current)
 - `--venv-name, -n` - Virtual environment name (default: venv)
 - `--python-version` - Python version (e.g., 3.11)
+- `--yes, -y` - Skip confirmation prompts (for CI/CD automation)
 - `--no-install` - Skip dependency installation
 - `--no-dotenv` - Skip .env generation
 
