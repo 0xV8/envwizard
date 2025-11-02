@@ -33,10 +33,20 @@ def _validate_project_path(path: Path) -> Path:
             raise ValueError("Path contains invalid null bytes")
 
         # Ensure path doesn't traverse to system directories
-        forbidden_paths = [Path("/etc"), Path("/sys"), Path("/proc"), Path("/root")]
+        # On macOS, /etc resolves to /private/etc, /var to /private/var, etc.
+        # So we check both the original and resolved versions
+        forbidden_paths = [
+            Path("/etc"), Path("/sys"), Path("/proc"), Path("/root"),
+            Path("/private/etc"), Path("/private/var/root"),
+        ]
+
         for forbidden in forbidden_paths:
+            # Resolve forbidden path to handle symlinks
+            forbidden_resolved = forbidden.resolve(strict=False)
+
+            # Check both resolved paths
             try:
-                resolved_path.relative_to(forbidden)
+                resolved_path.relative_to(forbidden_resolved)
                 raise ValueError(f"Access to {forbidden} is not allowed")
             except ValueError as e:
                 if "not allowed" in str(e):

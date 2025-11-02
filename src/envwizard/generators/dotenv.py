@@ -1,5 +1,6 @@
 """Generate .env files with smart defaults."""
 
+import os
 from pathlib import Path
 from typing import List, Optional, Tuple
 from envwizard.detectors.framework import FrameworkDetector
@@ -11,6 +12,34 @@ class DotEnvGenerator:
     def __init__(self, project_path: Optional[Path] = None) -> None:
         """Initialize dotenv generator."""
         self.project_path = project_path or Path.cwd()
+
+    def _validate_output_filename(self, filename: str) -> bool:
+        """
+        Validate output filename to prevent path traversal.
+
+        Args:
+            filename: The filename to validate
+
+        Returns:
+            True if filename is safe, False otherwise
+        """
+        # Reject if filename contains path separators
+        if os.sep in filename or (os.altsep and os.altsep in filename):
+            return False
+
+        # Reject if filename contains parent directory references
+        if ".." in filename:
+            return False
+
+        # Reject absolute paths
+        if os.path.isabs(filename):
+            return False
+
+        # Reject if filename contains null bytes
+        if "\x00" in filename:
+            return False
+
+        return True
 
     def generate_dotenv(
         self,
@@ -29,8 +58,18 @@ class DotEnvGenerator:
         Returns:
             Tuple of (success, message)
         """
+        # Validate output_file to prevent path traversal (SEC-005)
+        if not self._validate_output_filename(output_file):
+            return False, f"Invalid output filename: {output_file}. Must be a simple filename without path separators."
+
         env_path = self.project_path / output_file
         example_path = self.project_path / ".env.example"
+
+        # Verify the resolved path is within project directory
+        try:
+            env_path.resolve().relative_to(self.project_path.resolve())
+        except ValueError:
+            return False, f"Output file path escapes project directory: {output_file}"
 
         # Check if .env already exists
         if env_path.exists():
@@ -48,11 +87,18 @@ class DotEnvGenerator:
         env_content = self._generate_env_content(env_vars, frameworks, db_type)
 
         try:
-            # Write .env file
+            # Write .env file with secure permissions (SEC-011)
             env_path.write_text(env_content)
+            # Set permissions to 0600 (owner read/write only) on Unix-like systems
+            try:
+                env_path.chmod(0o600)
+            except (OSError, NotImplementedError):
+                # Windows or systems that don't support chmod
+                pass
+
             message = f"Created {output_file}"
 
-            # Write .env.example file
+            # Write .env.example file (can have normal permissions since it has no secrets)
             if create_example:
                 example_content = self._generate_example_content(env_vars, frameworks, db_type)
                 example_path.write_text(example_content)

@@ -1,0 +1,116 @@
+{
+  "summary": {
+    "total_tests": 8,
+    "passed": 8,
+    "failed": 0,
+    "pass_rate": 100.0,
+    "bugs_found": 0,
+    "critical_bugs": 0,
+    "high_bugs": 0,
+    "duration_seconds": 30.83,
+    "production_readiness_score": 100,
+    "readiness_level": "Production Ready"
+  },
+  "tests": [
+    {
+      "name": "Django Application",
+      "passed": true,
+      "details": {
+        "returncode": 0,
+        "venv_exists": true,
+        "dotenv_exists": true,
+        "dotenv_example_exists": true,
+        "gitignore_exists": true,
+        "django_vars_found": [
+          "SECRET_KEY",
+          "DEBUG",
+          "ALLOWED_HOSTS",
+          "DJANGO"
+        ],
+        "venv_activatable": true,
+        "django_installed": true
+      },
+      "timestamp": "2025-11-02T15:59:09.699012"
+    },
+    {
+      "name": "FastAPI Application",
+      "passed": true,
+      "details": {
+        "returncode": 0,
+        "venv_exists": true,
+        "dotenv_exists": true,
+        "api_vars_found": [
+          "API",
+          "DEBUG",
+          "SECRET_KEY"
+        ],
+        "redis_detected": true
+      },
+      "timestamp": "2025-11-02T15:59:18.480279"
+    },
+    {
+      "name": "Flask Application",
+      "passed": true,
+      "details": {
+        "returncode": 0,
+        "venv_exists": true,
+        "dotenv_exists": true
+      },
+      "timestamp": "2025-11-02T15:59:21.319694"
+    },
+    {
+      "name": "Empty Project",
+      "passed": true,
+      "details": {
+        "detect_returncode": 0,
+        "detect_passed": true,
+        "dotenv_created": true
+      },
+      "timestamp": "2025-11-02T15:59:21.615722"
+    },
+    {
+      "name": "Multi-Framework Project",
+      "passed": true,
+      "details": {
+        "returncode": 0,
+        "frameworks_detected": [
+          "Django",
+          "Celery",
+          "PostgreSQL"
+        ]
+      },
+      "timestamp": "2025-11-02T15:59:24.452327"
+    },
+    {
+      "name": "Existing Virtual Environment",
+      "passed": true,
+      "details": {
+        "pre_venv_exists": true,
+        "returncode": 0,
+        "handled_gracefully": true
+      },
+      "timestamp": "2025-11-02T15:59:26.812788"
+    },
+    {
+      "name": "CLI Commands",
+      "passed": true,
+      "details": {
+        "version": true,
+        "detect": true,
+        "create_venv": true,
+        "create_dotenv": true
+      },
+      "timestamp": "2025-11-02T15:59:29.502807"
+    },
+    {
+      "name": "Complex Dependencies",
+      "passed": true,
+      "details": {
+        "returncode": 0
+      },
+      "timestamp": "2025-11-02T15:59:31.951544"
+    }
+  ],
+  "bugs": [],
+  "generated_at": "2025-11-02T15:59:31.951632"
+}

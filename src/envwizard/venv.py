@@ -18,12 +18,13 @@ def _validate_package_name(package: str) -> bool:
     """
     Validate package name to prevent command injection.
 
-    Allows: alphanumeric, dots, hyphens, underscores, brackets, comparison operators
-    Examples: django, numpy>=1.20.0, requests[security], pkg-name, my_package
+    Allows: alphanumeric, dots, hyphens, underscores, brackets, comparison operators, commas
+    Examples: django, numpy>=1.20.0, requests[security], pkg-name, my_package, flask>=2.0,<3.0
     """
     # Pattern for valid pip package specifications
     # Covers: package-name, package[extras], package==1.0.0, package>=1.0,<2.0
-    pattern = r'^[a-zA-Z0-9][a-zA-Z0-9._\[\]>=<~!-]*$'
+    # Added comma (,) for complex version specifications like: flask>=2.0,<3.0
+    pattern = r'^[a-zA-Z0-9][a-zA-Z0-9._\[\]>=<~!,-]*$'
     return bool(re.match(pattern, package.strip()))
 
 
