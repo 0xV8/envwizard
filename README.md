@@ -195,8 +195,6 @@ MIT License - see LICENSE file for details
 
 ---
 
-**Made with ❤️ for Python developers**
-
 Save hours of setup time. Focus on building great applications.
 
 `pip install envwizard` and get started in seconds! 🚀
