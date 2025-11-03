@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "envwizard"
-version = "0.2.0"
+version = "0.2.1"
 description = "Smart environment setup tool - One command to create virtual envs, install deps, and configure .env intelligently"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -52,10 +52,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/envwizard"
-Documentation = "https://github.com/yourusername/envwizard#readme"
-Repository = "https://github.com/yourusername/envwizard"
-"Bug Tracker" = "https://github.com/yourusername/envwizard/issues"
+Homepage = "https://github.com/0xV8/envwizard"
+Documentation = "https://github.com/0xV8/envwizard#readme"
+Repository = "https://github.com/0xV8/envwizard"
+"Bug Tracker" = "https://github.com/0xV8/envwizard/issues"
 
 [project.scripts]
 envwizard = "envwizard.cli.main:cli"
